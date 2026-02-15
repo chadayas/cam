@@ -1,0 +1,8 @@
+menu "Wifi Credentials"
+config WIFI_NAME
+	string "wifi_name"
+	default "myssid"
+config WIFI_PW
+	string "wifi_password"
+	default "mypass"
+endmenu

@@ -1,5 +1,5 @@
 #include <iostream>
-
+#include "cam.h"
 
 static void wifi_event_cb(void *arg, esp_event_base_t event_base,
                           int32_t event_id, void *event_data) {
@@ -131,7 +131,6 @@ esp_err_t WifiService::disconnect(){
 
 WifiService::WifiService(){
 	init();
-	connect();
 }
 
 WifiService::~WifiService(){
@@ -142,8 +141,8 @@ WifiService::~WifiService(){
 
 
 
-void app_main(void){
-	Wifiservice wifi;
+extern "C" void app_main(void){
+	WifiService wifi;
 
 
 }
