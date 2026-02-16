@@ -139,6 +139,43 @@ WifiService::~WifiService(){
 	disconnect();
 }
 
+
+
+
+httpd_handle_t Httpserver::init(){
+	if (httpd_start(&svr, &cfg) == ESP_OK){
+		ESP_LOGI(TAG, "HTTP server started");
+
+//		httpd_uri_t root_s{};
+//		root_s.uri = "/";
+//		root_s.method = HTTP_GET;
+//		root_s.handler = root;
+
+//		register_route(&root_s);
+
+		return svr;
+	} else{
+		ESP_LOGE(TAG, "Unable to start server");
+		return NULL;
+	}
+}
+
+void Httpserver::deinit(){
+	if(svr != NULL)
+		httpd_stop(svr);
+}
+
+esp_err_t Httpserver::register_route(const httpd_uri_t *uri_cfg){
+    return httpd_register_uri_handler(svr, uri_cfg);
+}
+
+Httpserver::Httpserver(){
+	init();
+}
+
+Httpserver::~Httpserver(){
+	deinit();
+}
 extern "C" void app_main(void){
 	WifiService wifi;
 }
