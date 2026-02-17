@@ -39,12 +39,11 @@ namespace Stream{
 class WifiService{
 	public:
 		WifiService();
-		~WifiService();
 	public:
 		esp_err_t init();
 		esp_err_t connect();
 	public:
-		const int WIFI_RETRY_ATTEMPT = 3;
+		const int WIFI_RETRY_ATTEMPT = 10;
 		int wifi_retry_count = 0;
 
 		esp_netif_t *tutorial_netif = NULL;

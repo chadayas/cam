@@ -107,22 +107,6 @@ esp_err_t WifiService::connect(){
     return ESP_FAIL;
 }
 
-esp_err_t WifiService::deinit(){
-    esp_err_t ret = esp_wifi_stop();
-    if (ret == ESP_ERR_WIFI_NOT_INIT) {
-        ESP_LOGE(TAG, "Wi-Fi stack not initialized");
-        return ret;
-    }
-
-    ESP_ERROR_CHECK(esp_wifi_deinit());
-    ESP_ERROR_CHECK(esp_wifi_clear_default_wifi_driver_and_handlers(tutorial_netif));
-    esp_netif_destroy(tutorial_netif);
-
-    ESP_ERROR_CHECK(esp_event_handler_instance_unregister(IP_EVENT, ESP_EVENT_ANY_ID, ip_event_handler));
-    ESP_ERROR_CHECK(esp_event_handler_instance_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, wifi_event_handler));
-
-    return ESP_OK;
-}
 
 WifiService::WifiService(){
 	init();
@@ -269,8 +253,24 @@ esp_err_t init_camera(){
 }
 
 
+void scan_task(void *param) {
+	const char* TAG = "[--SCAN--]";
+	wifi_scan_config_t scan_config{};
+	wifi_ap_record_t ap_records[10];
+	uint16_t ap_count = 10;
+
+	esp_wifi_scan_start(&scan_config, true);
+	esp_wifi_scan_get_ap_records(&ap_count, ap_records);
+
+	for (int i = 0; i < ap_count; i++) {
+		ESP_LOGI(TAG, "SSID: %s, RSSI: %d dBm", ap_records[i].ssid, ap_records[i].rssi);
+	}
+	vTaskDelete(NULL);
+}
+
 extern "C" void app_main(void){
-	WifiService wifi;
-	Httpserver http;
+	static WifiService wifi;
+	xTaskCreate(scan_task, "scan_task", 4096, NULL, 5, NULL);
+	static Httpserver http;
 
 }
