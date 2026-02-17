@@ -27,6 +27,7 @@ Same classes used in breathalyzer project, initing wifi and
 http server in esp-idf is essentially boilerplate code that can 
 be copied.
 */
+#define CONFIG_XCLK_FREQ 20000000
 #define PART_BOUNDARY "123456789000000000000987654321"
 
 namespace Stream{
