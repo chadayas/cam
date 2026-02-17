@@ -22,6 +22,19 @@
 
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT BIT1
+/*
+Same classes used in breathalyzer project, initing wifi and 
+http server in esp-idf is essentially boilerplate code that can 
+be copied.
+*/
+#define PART_BOUNDARY "123456789000000000000987654321"
+
+namespace Stream{
+	const char* CONTENT_TYPE = "multipart/x-mixed-replace;boundary=" PART_BOUNDARY;
+	const char* BOUNDARY = "\r\n--" PART_BOUNDARY "\r\n";
+	const char* PART = "Content-Type: image/jpeg\r\nContent-Length: %u\r\n\r\n";
+
+};
 
 class WifiService{
 	public:

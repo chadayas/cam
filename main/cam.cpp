@@ -139,19 +139,84 @@ WifiService::~WifiService(){
 	disconnect();
 }
 
+esp_err_t stream_handler(httpd_req_t *req){
+	camera_fb_t * fb = NULL;
+	esp_err_t res = ESP_OK;
+	size_t _jpg_buf_len;
+	uint8_t * _jpg_buf;
+	char * part_buf[64];
+	static int64_t last_frame = 0;
+	if(!last_frame) {
+		last_frame = esp_timer_get_time();
+	}
 
+	res = httpd_resp_set_type(req, Stream::CONTENT_TYPE);
+	if(res != ESP_OK){
+		return res;
+	}
+
+	while(true){
+		fb = esp_camera_fb_get();
+		if (!fb) {
+			ESP_LOGE(TAG, "Camera capture failed");
+			res = ESP_FAIL;
+			break;
+		}
+		if(fb->format != PIXFORMAT_JPEG){
+			bool jpeg_converted = frame2jpg(fb, 80, &_jpg_buf, &_jpg_buf_len);
+			if(!jpeg_converted){
+				ESP_LOGE(TAG, "JPEG compression failed");
+				esp_camera_fb_return(fb);
+				res = ESP_FAIL;
+			}
+		} else {
+			_jpg_buf_len = fb->len;
+			_jpg_buf = fb->buf;
+		}
+
+		if(res == ESP_OK){
+			res = httpd_resp_send_chunk(req, Stream::BOUNDARY, strlen(Stream::BOUNDARY));
+		}
+		if(res == ESP_OK){
+			size_t hlen = snprintf((char *)part_buf, 64, Stream::PART, _jpg_buf_len);
+
+			res = httpd_resp_send_chunk(req, (const char *)part_buf, hlen);
+		}
+		if(res == ESP_OK){
+			res = httpd_resp_send_chunk(req, (const char *)_jpg_buf, _jpg_buf_len);
+		}
+		if(fb->format != PIXFORMAT_JPEG){
+			free(_jpg_buf);
+		}
+		esp_camera_fb_return(fb);
+		if(res != ESP_OK){
+			break;
+		}
+		int64_t fr_end = esp_timer_get_time();
+		int64_t frame_time = fr_end - last_frame;
+		last_frame = fr_end;
+		frame_time /= 1000;
+		ESP_LOGI(TAG, "MJPG: %uKB %ums (%.1ffps)",
+				(uint32_t)(_jpg_buf_len/1024),
+				(uint32_t)frame_time, 1000.0 / (uint32_t)frame_time);
+	}
+
+	last_frame = 0;
+	return res;
+
+}
 
 
 httpd_handle_t Httpserver::init(){
 	if (httpd_start(&svr, &cfg) == ESP_OK){
 		ESP_LOGI(TAG, "HTTP server started");
 
-//		httpd_uri_t root_s{};
-//		root_s.uri = "/";
-//		root_s.method = HTTP_GET;
-//		root_s.handler = root;
+		httpd_uri_t stream_s{};
+		root_s.uri = "/stream";
+		root_s.method = HTTP_GET;
+		root_s.handler = stream_handler;
 
-//		register_route(&root_s);
+		register_route(&stream_s);
 
 		return svr;
 	} else{
