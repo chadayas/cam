@@ -16,7 +16,6 @@
 #include "esp_camera.h"
 #include "camera_pins.h"
 
-#define TAG "[PROJECT]"
 
 #define WIFI_AUTHMODE WIFI_AUTH_WPA2_PSK
 
@@ -44,8 +43,6 @@ class WifiService{
 	public:
 		esp_err_t init();
 		esp_err_t connect();
-		esp_err_t deinit();
-		esp_err_t disconnect();
 	public:
 		const int WIFI_RETRY_ATTEMPT = 3;
 		int wifi_retry_count = 0;
@@ -57,20 +54,20 @@ class WifiService{
 		EventGroupHandle_t wifi_event_group = NULL;
 	private:
 		wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+		const char* TAG = "[--WIFI--]";
 };
 
 
 class Httpserver{
 	public:
 		Httpserver();
-		~Httpserver();
 	public:
 		httpd_handle_t init();
-		void deinit();
 		esp_err_t register_route(const httpd_uri_t *uri_cfg);	
 	private:
 		httpd_config_t cfg = HTTPD_DEFAULT_CONFIG();
 		httpd_handle_t svr = NULL;
+		const char* TAG = "[--HTTP--]";
 };
 
 

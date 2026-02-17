@@ -3,8 +3,9 @@
 
 static void wifi_event_cb(void *arg, esp_event_base_t event_base,
                           int32_t event_id, void *event_data) {
+	const char* TAG = "[--WIFI CALLBACK--]";	
 	WifiService *svc = (WifiService *)arg;
-	
+		
     if (event_id == WIFI_EVENT_STA_START) {
         ESP_LOGI(TAG, "WiFi started, connecting...");
         esp_wifi_connect();
@@ -22,6 +23,8 @@ static void wifi_event_cb(void *arg, esp_event_base_t event_base,
 
 static void ip_event_cb(void *arg, esp_event_base_t event_base,
                         int32_t event_id, void *event_data) {
+	
+	const char* TAG = "[--IP CALLBACK--]";	
 	WifiService *svc = (WifiService *)arg;
 
     if (event_id == IP_EVENT_STA_GOT_IP) {
@@ -121,25 +124,14 @@ esp_err_t WifiService::deinit(){
     return ESP_OK;
 }
 
-esp_err_t WifiService::disconnect(){
-    if (wifi_event_group) {
-        vEventGroupDelete(wifi_event_group);
-    }
-
-    return esp_wifi_disconnect();
-}
-
 WifiService::WifiService(){
 	init();
 	connect();
 }
 
-WifiService::~WifiService(){
-	deinit();
-	disconnect();
-}
 
 esp_err_t stream_handler(httpd_req_t *req){
+	const char* TAG = "[--STREAM HANDLER--]";	
 	camera_fb_t * fb = NULL;
 	esp_err_t res = ESP_OK;
 	size_t _jpg_buf_len;
@@ -225,10 +217,6 @@ httpd_handle_t Httpserver::init(){
 	}
 }
 
-void Httpserver::deinit(){
-	if(svr != NULL)
-		httpd_stop(svr);
-}
 
 esp_err_t Httpserver::register_route(const httpd_uri_t *uri_cfg){
     return httpd_register_uri_handler(svr, uri_cfg);
@@ -238,9 +226,6 @@ Httpserver::Httpserver(){
 	init();
 }
 
-Httpserver::~Httpserver(){
-	deinit();
-}
 
 esp_err_t init_camera(){
  
