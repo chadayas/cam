@@ -243,6 +243,7 @@ esp_err_t init_camera(){
 
 	camera_config.jpeg_quality = 12;
 	camera_config.fb_count = 1;
+	camera_config.fb_location = CAMERA_FB_IN_PSRAM;
 	camera_config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
 	
 	esp_err_t err = esp_camera_init(&camera_config);
@@ -271,6 +272,8 @@ void scan_task(void *param) {
 extern "C" void app_main(void){
 	static WifiService wifi;
 	xTaskCreate(scan_task, "scan_task", 4096, NULL, 5, NULL);
+	init_camera();	
+		
 	static Httpserver http;
 
 }
