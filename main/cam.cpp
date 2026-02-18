@@ -118,9 +118,7 @@ esp_err_t stream_handler(httpd_req_t *req){
 	const char* TAG = "[--STREAM HANDLER--]";	
 	camera_fb_t * fb = NULL;
 	esp_err_t res = ESP_OK;
-	size_t _jpg_buf_len;
-	uint8_t * _jpg_buf;
-	char * part_buf[64];
+	char  part_buf[64];
 	static int64_t last_frame = 0;
 	if(!last_frame) {
 		last_frame = esp_timer_get_time();
@@ -133,47 +131,35 @@ esp_err_t stream_handler(httpd_req_t *req){
 
 	while(true){
 		fb = esp_camera_fb_get();
+		
 		if (!fb) {
 			ESP_LOGE(TAG, "Camera capture failed");
 			res = ESP_FAIL;
 			break;
 		}
-		if(fb->format != PIXFORMAT_JPEG){
-			bool jpeg_converted = frame2jpg(fb, 80, &_jpg_buf, &_jpg_buf_len);
-			if(!jpeg_converted){
-				ESP_LOGE(TAG, "JPEG compression failed");
-				esp_camera_fb_return(fb);
-				res = ESP_FAIL;
-			}
-		} else {
-			_jpg_buf_len = fb->len;
-			_jpg_buf = fb->buf;
+
+		res = httpd_resp_send_chunk(req, Stream::BOUNDARY, strlen(Stream::BOUNDARY));
+		if(res == ESP_OK){
+			size_t hlen = snprintf(part_buf, 64, Stream::PART, fb->len);
+			res = httpd_resp_send_chunk(req, part_buf, hlen);
+		}
+		
+		if(res == ESP_OK){
+			res = httpd_resp_send_chunk(req, (const char *)fb->buf, fb->len);
 		}
 
-		if(res == ESP_OK){
-			res = httpd_resp_send_chunk(req, Stream::BOUNDARY, strlen(Stream::BOUNDARY));
-		}
-		if(res == ESP_OK){
-			size_t hlen = snprintf((char *)part_buf, 64, Stream::PART, _jpg_buf_len);
-
-			res = httpd_resp_send_chunk(req, (const char *)part_buf, hlen);
-		}
-		if(res == ESP_OK){
-			res = httpd_resp_send_chunk(req, (const char *)_jpg_buf, _jpg_buf_len);
-		}
-		if(fb->format != PIXFORMAT_JPEG){
-			free(_jpg_buf);
-		}
+		size_t frame_len = fb->len;
 		esp_camera_fb_return(fb);
 		if(res != ESP_OK){
 			break;
 		}
+
 		int64_t fr_end = esp_timer_get_time();
 		int64_t frame_time = fr_end - last_frame;
 		last_frame = fr_end;
 		frame_time /= 1000;
 		ESP_LOGI(TAG, "MJPG: %uKB %ums (%.1ffps)",
-				(uint32_t)(_jpg_buf_len/1024),
+				(uint32_t)(frame_len/1024),
 				(uint32_t)frame_time, 1000.0 / (uint32_t)frame_time);
 	}
 
