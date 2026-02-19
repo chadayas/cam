@@ -225,10 +225,10 @@ esp_err_t init_camera(){
 	camera_config.ledc_channel = LEDC_CHANNEL_0;
 
 	camera_config.pixel_format = PIXFORMAT_JPEG;
-	camera_config.frame_size = FRAMESIZE_UXGA;
+	camera_config.frame_size = FRAMESIZE_SVGA;
 
-	camera_config.jpeg_quality = 12;
-	camera_config.fb_count = 1;
+	camera_config.jpeg_quality = 27;
+	camera_config.fb_count = 2;
 	camera_config.fb_location = CAMERA_FB_IN_PSRAM;
 	camera_config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
 	
