@@ -117,23 +117,24 @@ WifiService::WifiService(){
 
 esp_err_t auth_handler(httpd_req_t *req){
 	std::ifstream file("/data/login.html");
-	auto tag = "[--HTML(GET)--]";	
-	ESP_LOGI(tag, "HTML sent to client");
+	auto tag = "[--(AUTH)--]";	
 	if(!file.is_open()){
-		httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to open Html");
+		httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "failed to open html");
 		return ESP_FAIL;
 	}
 
 	std::string html((std::istreambuf_iterator<char>(file)),
 			(std::istreambuf_iterator<char>()));
 	httpd_resp_set_type(req,"text/html");
-	if (html.c_str() == NULL){
-		ESP_LOGE(tag, "HTML file is a NULL");
+	
+	if (httpd_resp_set_type(req, html.c_str(), html.length()) == ESP_OK){
+		ESP_LOGI(tag, "HTML sent to client");
+		return httpd_resp_send(req, html.c_str(), html.length());
+	} else {
+		ESP_LOGE(tag, "ERROR SENDING HTML");
 		return ESP_FAIL;
-	} else
-		return httpd_resp_set_type(req, html.c_str());
+	} 
 }
-
 esp_err_t check_creds_handler(httpd_req_t *req){
 	auto tag = "[--HTML(POST)--]";	
 	char buf[] = {0};
@@ -228,7 +229,7 @@ httpd_handle_t Httpserver::init(){
 
 
 		register_route(&auth_s);
-		register_route(&stream_s);
+		//register_route(&stream_s);
 		//register_route(&cred_s);
 
 		return svr;
