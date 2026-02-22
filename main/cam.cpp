@@ -137,7 +137,7 @@ esp_err_t check_creds_handler(httpd_req_t *req){
 	int bytes = httpd_req_recv(req, buf, buf_len);	
 	if ( bytes > 0){
 		ESP_LOGI(tag, "%d Bytes received",bytes);
-		auto n_len = req->content_len;	
+		size_t n_len = req->content_len;	
 		ESP_LOGI(tag, "context_len size is %d ",n_len);
 	} else{
 		ESP_LOGE("No bytes received");
