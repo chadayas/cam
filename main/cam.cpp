@@ -216,9 +216,9 @@ httpd_handle_t Httpserver::init(){
 		stream_s.handler = stream_handler;
 		
 		httpd_uri_t auth_s{};
-		stream_s.uri = "/auth";
-		stream_s.method = HTTP_GET;
-		stream_s.handler = auth_handler;
+		auth_s.uri = "/auth";
+		auth_s.method = HTTP_GET;
+		auth_s.handler = auth_handler;
 		
 		/*httpd_uri_t cred_s{};
 		stream_s.uri = "/auth";
@@ -240,9 +240,16 @@ httpd_handle_t Httpserver::init(){
 
 
 esp_err_t Httpserver::register_route(const httpd_uri_t *uri_cfg){
-    return httpd_register_uri_handler(svr, uri_cfg);
-}
+   	auto tag = "[--REGISTER ROUTE--]";	
+	if (uri_cfg == NULL){
+		ESP_LOGE(tag, "URI config is null");
+		return ESP_FAIL;
+	}else{ 
+		ESP_LOGI(tag, "URI config is fine");	
+		return httpd_register_uri_handler(svr, uri_cfg);
+	}
 
+}
 Httpserver::Httpserver(){
 	init();
 }
