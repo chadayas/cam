@@ -116,7 +116,7 @@ WifiService::WifiService(){
 }
 
 esp_err_t auth_handler(httpd_req_t *req){
-	std::ifstream file("/data/login.html");
+	std::ifstream file("/spiffs/login.html");
 	auto tag = "[--(AUTH)--]";	
 	if(!file.is_open()){
 		httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "failed to open html");
@@ -127,7 +127,7 @@ esp_err_t auth_handler(httpd_req_t *req){
 			(std::istreambuf_iterator<char>()));
 	httpd_resp_set_type(req,"text/html");
 	
-	if (httpd_resp_set_type(req, html.c_str(), html.length()) == ESP_OK){
+	if (httpd_resp_send(req, html.c_str(), html.length()) == ESP_OK){
 		ESP_LOGI(tag, "HTML sent to client");
 		return httpd_resp_send(req, html.c_str(), html.length());
 	} else {
@@ -318,7 +318,26 @@ extern "C" void app_main(void){
 	static WifiService wifi;
 	xTaskCreate(scan_task, "scan_task", 4096, NULL, 5, NULL);
 	init_camera();	
-		
+	
+	esp_vfs_spiffs_conf_t cfg{};
+	cfg.base_path = "/spiffs";
+	cfg.partition_label = NULL;
+	cfg.max_files = 5;
+	cfg.format_if_mount_failed = true;
+	
+	esp_err_t ret = esp_vfs_spiffs_register(&cfg);
+	
+	if (ret != ESP_OK) {
+	    if (ret == ESP_FAIL) {
+        	ESP_LOGE(TAG, "Failed to mount or format filesystem");
+    	  } else if (ret == ESP_ERR_NOT_FOUND) {
+        	ESP_LOGE(TAG, "Failed to find SPIFFS partition");
+          } else {
+   	     	ESP_LOGE(TAG, "Failed to initialize SPIFFS (%s)", esp_err_to_name(ret));
+    	}
+    	  return;
+    	}	
+	
 	static Httpserver http;
 
 }
