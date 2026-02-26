@@ -15,7 +15,7 @@
 #include "driver/gpio.h"
 #include "esp_camera.h"
 #include "camera_pins.h"
-
+#include "esp_spiffs.h"
 
 #define WIFI_AUTHMODE WIFI_AUTH_WPA2_PSK
 
