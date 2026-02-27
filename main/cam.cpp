@@ -136,14 +136,15 @@ esp_err_t auth_handler(httpd_req_t *req){
 	return ret;
 }
 esp_err_t check_creds_handler(httpd_req_t *req){
+	// TODO implement a checker for correct auth, test it first.		
+
 	auto tag = "[--HTML(POST)--]";	
-	char buf[] = {0};
+	char buf[256] = {0};
 	auto buf_len = sizeof(buf);
-	int bytes = httpd_req_recv(req, buf, buf_len);	
+	int bytes = httpd_req_recv(req, buf, buf_len - 1);
 	if ( bytes > 0){
-		ESP_LOGI(tag, "%d Bytes received",bytes);
-		size_t n_len = req->content_len;	
-		ESP_LOGI(tag, "context_len size is %d ",n_len);
+		ESP_LOGI(tag, "%d Bytes received", bytes);
+		ESP_LOGI(tag, "Body: %s", buf);
 	} else{
 		ESP_LOGE(tag, "No bytes received");
 		return ESP_FAIL;	
@@ -221,16 +222,16 @@ httpd_handle_t Httpserver::init(){
 		auth_s.method = HTTP_GET;
 		auth_s.handler = auth_handler;
 		
-		/*httpd_uri_t cred_s{};
-		stream_s.uri = "/auth";
-		stream_s.method = HTTP_POST;
-		stream_s.handler = auth_handler;*/
+		httpd_uri_t cred_s{};
+		cred_s.uri = "/auth";
+		cred_s.method = HTTP_POST;
+		cred_s.handler = check_creds_handler;
 
 
 
 		register_route(&auth_s);
 		//register_route(&stream_s);
-		//register_route(&cred_s);
+		register_route(&cred_s);
 
 		return svr;
 	} else{
