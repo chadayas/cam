@@ -6,3 +6,12 @@ config WIFI_PW
 	string "wifi_password"
 	default "mypass"
 endmenu
+
+menu "Camera Auth"
+config CAM_USERNAME
+	string "cam_username"
+	default "admin"
+config CAM_PASSWORD
+	string "cam_password"
+	default "password"
+endmenu

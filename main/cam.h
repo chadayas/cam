@@ -17,8 +17,9 @@
 #include "camera_pins.h"
 #include "esp_spiffs.h"
 
+#define USERNAME "moorest"
+#define PASSWORD "1711"
 #define WIFI_AUTHMODE WIFI_AUTH_WPA2_PSK
-
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT BIT1
 /*

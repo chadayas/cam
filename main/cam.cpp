@@ -140,6 +140,7 @@ esp_err_t check_creds_handler(httpd_req_t *req){
 
 	auto tag = "[--HTML(POST)--]";	
 	char buf[256] = {0};
+	size_t i = 0;	
 	auto buf_len = sizeof(buf);
 	int bytes = httpd_req_recv(req, buf, buf_len - 1);
 	if ( bytes > 0){
@@ -149,6 +150,19 @@ esp_err_t check_creds_handler(httpd_req_t *req){
 		ESP_LOGE(tag, "No bytes received");
 		return ESP_FAIL;	
 	}	
+
+	std::string buf_str(buf);	
+	std::string entry_user, entry_pass;	
+	size_t user_idx = buf_str.find('=');
+	size_t pass_idx = buf_str.find('=', 2 + user_idx);
+	
+	entry_user = buf_str.substr(1 + user_idx, buf_str.find('&') - user_idx - 1);	
+	entry_pass = buf_str.substr(1 + pass_idx, buf_str.size() - pass_idx); 
+
+	
+	ESP_LOGI(tag, "User: %s", entry_user.c_str());
+	ESP_LOGI(tag, "Password: %s", entry_pass.c_str());
+
 	return ESP_OK;
 }
 
