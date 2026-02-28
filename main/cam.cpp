@@ -163,7 +163,19 @@ esp_err_t check_creds_handler(httpd_req_t *req){
 	ESP_LOGI(tag, "User: %s", entry_user.c_str());
 	ESP_LOGI(tag, "Password: %s", entry_pass.c_str());
 
-	return ESP_OK;
+	if (entry_user == CONFIG_CAM_USERNAME && entry_pass == CONFIG_CAM_PASSWORD) {
+		ESP_LOGI(tag, "Auth success, redirecting to /stream");
+		httpd_resp_set_status(req, "302 Found");
+		httpd_resp_set_hdr(req, "Location", "/stream");
+		httpd_resp_send(req, NULL, 0);
+		return ESP_OK;
+	} else {
+		ESP_LOGW(tag, "Auth failed, redirecting to /auth");
+		httpd_resp_set_status(req, "302 Found");
+		httpd_resp_set_hdr(req, "Location", "/auth");
+		httpd_resp_send(req, NULL, 0);
+		return ESP_OK;
+	}
 }
 
 
