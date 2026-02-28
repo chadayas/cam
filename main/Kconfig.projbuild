@@ -14,4 +14,7 @@ config CAM_USERNAME
 config CAM_PASSWORD
 	string "cam_password"
 	default "password"
+config CAM_SESSION_TOKEN
+	string "cam_session_token"
+	default "changeme123"
 endmenu

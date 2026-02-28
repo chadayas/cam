@@ -135,12 +135,19 @@ esp_err_t auth_handler(httpd_req_t *req){
 	}
 	return ret;
 }
-esp_err_t check_creds_handler(httpd_req_t *req){
-	// TODO implement a checker for correct auth, test it first.		
+static bool is_authenticated(httpd_req_t *req){
+	char cookie_buf[128] = {0};
+	if (httpd_req_get_hdr_value_str(req, "Cookie", cookie_buf, sizeof(cookie_buf)) != ESP_OK)
+		return false;
 
-	auto tag = "[--HTML(POST)--]";	
+	std::string cookies(cookie_buf);
+	std::string token = "session=" + std::string(CONFIG_CAM_SESSION_TOKEN);
+	return cookies.find(token) != std::string::npos;
+}
+
+esp_err_t check_creds_handler(httpd_req_t *req){
+	auto tag = "[--HTML(POST)--]";
 	char buf[256] = {0};
-	size_t i = 0;	
 	auto buf_len = sizeof(buf);
 	int bytes = httpd_req_recv(req, buf, buf_len - 1);
 	if ( bytes > 0){
@@ -148,23 +155,24 @@ esp_err_t check_creds_handler(httpd_req_t *req){
 		ESP_LOGI(tag, "Body: %s", buf);
 	} else{
 		ESP_LOGE(tag, "No bytes received");
-		return ESP_FAIL;	
-	}	
+		return ESP_FAIL;
+	}
 
-	std::string buf_str(buf);	
-	std::string entry_user, entry_pass;	
+	std::string buf_str(buf);
+	std::string entry_user, entry_pass;
 	size_t user_idx = buf_str.find('=');
 	size_t pass_idx = buf_str.find('=', 2 + user_idx);
-	
-	entry_user = buf_str.substr(1 + user_idx, buf_str.find('&') - user_idx - 1);	
-	entry_pass = buf_str.substr(1 + pass_idx, buf_str.size() - pass_idx); 
 
-	
+	entry_user = buf_str.substr(1 + user_idx, buf_str.find('&') - user_idx - 1);
+	entry_pass = buf_str.substr(1 + pass_idx, buf_str.size() - pass_idx);
+
 	ESP_LOGI(tag, "User: %s", entry_user.c_str());
 	ESP_LOGI(tag, "Password: %s", entry_pass.c_str());
 
 	if (entry_user == CONFIG_CAM_USERNAME && entry_pass == CONFIG_CAM_PASSWORD) {
-		ESP_LOGI(tag, "Auth success, redirecting to /stream");
+		ESP_LOGI(tag, "Auth success, setting session cookie");
+		std::string cookie = "session=" + std::string(CONFIG_CAM_SESSION_TOKEN) + "; Path=/; HttpOnly";
+		httpd_resp_set_hdr(req, "Set-Cookie", cookie.c_str());
 		httpd_resp_set_status(req, "302 Found");
 		httpd_resp_set_hdr(req, "Location", "/stream");
 		httpd_resp_send(req, NULL, 0);
@@ -180,7 +188,16 @@ esp_err_t check_creds_handler(httpd_req_t *req){
 
 
 esp_err_t stream_handler(httpd_req_t *req){
-	const char* TAG = "[--STREAM HANDLER--]";	
+	const char* TAG = "[--STREAM HANDLER--]";
+
+	if (!is_authenticated(req)) {
+		ESP_LOGW(TAG, "Unauthenticated request, redirecting to /auth");
+		httpd_resp_set_status(req, "302 Found");
+		httpd_resp_set_hdr(req, "Location", "/auth");
+		httpd_resp_send(req, NULL, 0);
+		return ESP_OK;
+	}
+
 	camera_fb_t * fb = NULL;
 	esp_err_t res = ESP_OK;
 	char  part_buf[64];
@@ -256,7 +273,7 @@ httpd_handle_t Httpserver::init(){
 
 
 		register_route(&auth_s);
-		//register_route(&stream_s);
+		register_route(&stream_s);
 		register_route(&cred_s);
 
 		return svr;
