@@ -139,7 +139,6 @@ static bool is_authenticated(httpd_req_t *req){
 	char cookie_buf[128] = {0};
 	if (httpd_req_get_hdr_value_str(req, "Cookie", cookie_buf, sizeof(cookie_buf)) != ESP_OK)
 		return false;
-
 	std::string cookies(cookie_buf);
 	std::string token = "session=" + std::string(CONFIG_CAM_SESSION_TOKEN);
 	return cookies.find(token) != std::string::npos;
