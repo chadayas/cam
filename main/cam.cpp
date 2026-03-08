@@ -341,6 +341,24 @@ esp_err_t init_camera(){
     return ESP_OK;
 }
 
+esp_err_t init_servo(){
+	servo_config_t s_cfg{};
+	s_cfg.max_angle = 270;
+	s_cfg.min_width_us = 500;
+	s_cfg.max_width_us = 2500;
+	s_cfg.freq = 50;
+	s_cfg.timer_number = LEDC_TIMER_0;
+	s_cfg.channel_number = 1;
+	s_cfg.channels.servo_pin[0] = GPIO_NUM_14;
+	s_cfg.channels.ch[0] = LEDC_CHANNEL_0;
+ 
+	esp_err_t status = iot_servo_init(LEDC_LOW_SPEED_MODE, &s_cfg);
+	if (status != ESP_OK)
+		return err;
+		
+	return ESP_OK;
+}
+
 
 void scan_task(void *param) {
 	const char* TAG = "[--SCAN--]";
@@ -361,7 +379,8 @@ extern "C" void app_main(void){
 	static WifiService wifi;
 	xTaskCreate(scan_task, "scan_task", 4096, NULL, 5, NULL);
 	init_camera();	
-	
+	init_servo();
+
 	esp_vfs_spiffs_conf_t cfg{};
 	cfg.base_path = "/data";
 	cfg.partition_label = "spiffs";

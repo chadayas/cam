@@ -28,6 +28,11 @@ be copied.
 #define CONFIG_XCLK_FREQ 20000000
 #define PART_BOUNDARY "123456789000000000000987654321"
 
+esp_err_t init_camera();
+esp_err_t init_servo();
+
+
+
 namespace Stream{
 	const char* CONTENT_TYPE = "multipart/x-mixed-replace;boundary=" PART_BOUNDARY;
 	const char* BOUNDARY = "\r\n--" PART_BOUNDARY "\r\n";
