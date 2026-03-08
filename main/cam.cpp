@@ -270,6 +270,34 @@ esp_err_t button_handler(httpd_req_t *req){
 	return ret;
 }
 
+esp_err_t servo_handler(httpd_req_t * req){
+	auto tag = "[--SERVO--]";	
+	char query[64] = {0};
+	char cmd[16] = {0};
+	float angle = 0.0f;
+
+	http_req_get_url_query_str(req, query, sizeof(query));
+	httpd_query_key_value(query, "cmd", cmd, sizeof(cmd));
+	ESP_LOGI(tag, "cmd: %s",cmd);
+	
+	if (strcmp(cmd, "left") == 0){
+		auto mini_tag = "[INC ANGLE]"	
+		angle += 1.0f;
+		if (angle > 270.0f) angle = 270.0f;
+		iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 0, angle);
+		ESP_LOGI(mini_tag, "%.1f", angle);
+	} else if (strcmp(cmd, "right") == 0){
+		auto mini_tag = "[DEC ANGLE]"	
+		angle -= 1.0f;
+		if (angle < 0.0f) angle = 0.0f;
+		iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 0, angle);
+		ESP_LOGI(mini_tag, "%.1f", angle);
+	}
+
+	httpd_resp_send(req, NULL, 0);
+	return ESP_OK;
+}
+
 httpd_handle_t Httpserver::init(){
 	if (httpd_start(&svr, &cfg) == ESP_OK){
 		ESP_LOGI(TAG, "HTTP server started");
@@ -278,6 +306,13 @@ httpd_handle_t Httpserver::init(){
 		button_s.uri = "/";
 		button_s.method = HTTP_GET;
 		button_s.handler = button_handler;
+		
+		httpd_uri_t servo_s{};
+		servo_s.uri = "/servo";
+		servo_s.method = HTTP_GET;
+		servo_s.handler = servo_handler;
+		
+
 		
 		httpd_uri_t stream_s{};
 		stream_s.uri = "/stream";
