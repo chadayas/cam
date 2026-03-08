@@ -249,11 +249,36 @@ esp_err_t stream_handler(httpd_req_t *req){
 
 }
 
+esp_err_t button_handler(httpd_req_t *req){
+	std::ifstream file("/data/button.html");
+	auto tag = "[--BUTTON--]";	
+	if(!file.is_open()){
+		httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "failed to open html");
+		return ESP_FAIL;
+	}
+
+	std::string html((std::istreambuf_iterator<char>(file)),
+			(std::istreambuf_iterator<char>()));
+	httpd_resp_set_type(req,"text/html");
+	
+	esp_err_t ret = httpd_resp_send(req, html.c_str(), html.length());
+	if (ret == ESP_OK){
+		ESP_LOGI(tag, "HTML sent to client");
+	} else {
+		ESP_LOGE(tag, "ERROR SENDING HTML");
+	}
+	return ret;
+}
 
 httpd_handle_t Httpserver::init(){
 	if (httpd_start(&svr, &cfg) == ESP_OK){
 		ESP_LOGI(TAG, "HTTP server started");
 
+		httpd_uri_t button_s{};
+		button_s.uri = "/";
+		button_s.method = HTTP_GET;
+		button_s.handler = button_handler;
+		
 		httpd_uri_t stream_s{};
 		stream_s.uri = "/stream";
 		stream_s.method = HTTP_GET;
