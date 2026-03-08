@@ -212,7 +212,7 @@ esp_err_t stream_handler(httpd_req_t *req){
 
 	while(true){
 		fb = esp_camera_fb_get();
-		
+		ESP_LOGI(TAG, "frame buffer: %d",fb);	
 		if (!fb) {
 			ESP_LOGE(TAG, "Camera capture failed");
 			res = ESP_FAIL;
@@ -276,21 +276,21 @@ esp_err_t servo_handler(httpd_req_t * req){
 	char cmd[16] = {0};
 	float angle = 0.0f;
 
-	http_req_get_url_query_str(req, query, sizeof(query));
+	httpd_req_get_url_query_str(req, query, sizeof(query));
 	httpd_query_key_value(query, "cmd", cmd, sizeof(cmd));
 	ESP_LOGI(tag, "cmd: %s",cmd);
 	
 	if (strcmp(cmd, "left") == 0){
-		auto mini_tag = "[INC ANGLE]"	
+		auto mini_tag = "[INC ANGLE]";
 		angle += 1.0f;
 		if (angle > 270.0f) angle = 270.0f;
-		iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 0, angle);
+		iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 1, angle);
 		ESP_LOGI(mini_tag, "%.1f", angle);
 	} else if (strcmp(cmd, "right") == 0){
-		auto mini_tag = "[DEC ANGLE]"	
+		auto mini_tag = "[DEC ANGLE]";	
 		angle -= 1.0f;
 		if (angle < 0.0f) angle = 0.0f;
-		iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 0, angle);
+		iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 1, angle);
 		ESP_LOGI(mini_tag, "%.1f", angle);
 	}
 
@@ -390,7 +390,7 @@ esp_err_t init_camera(){
 	camera_config.frame_size = FRAMESIZE_XGA;
 
 	camera_config.jpeg_quality = 20;
-	camera_config.fb_count = 2;
+	camera_config.fb_count = 1;
 	camera_config.fb_location = CAMERA_FB_IN_PSRAM;
 	camera_config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
 	
@@ -407,14 +407,14 @@ esp_err_t init_servo(){
 	s_cfg.min_width_us = 500;
 	s_cfg.max_width_us = 2500;
 	s_cfg.freq = 50;
-	s_cfg.timer_number = LEDC_TIMER_0;
+	s_cfg.timer_number = LEDC_TIMER_1;
 	s_cfg.channel_number = 1;
 	s_cfg.channels.servo_pin[0] = GPIO_NUM_14;
-	s_cfg.channels.ch[0] = LEDC_CHANNEL_0;
+	s_cfg.channels.ch[0] = LEDC_CHANNEL_1;
  
 	esp_err_t status = iot_servo_init(LEDC_LOW_SPEED_MODE, &s_cfg);
 	if (status != ESP_OK)
-		return err;
+		return status;
 		
 	return ESP_OK;
 }
