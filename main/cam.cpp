@@ -312,8 +312,6 @@ httpd_handle_t Httpserver::init(){
 		servo_s.method = HTTP_GET;
 		servo_s.handler = servo_handler;
 		
-
-		
 		httpd_uri_t stream_s{};
 		stream_s.uri = "/stream";
 		stream_s.method = HTTP_GET;
@@ -334,6 +332,8 @@ httpd_handle_t Httpserver::init(){
 		register_route(&auth_s);
 		register_route(&stream_s);
 		register_route(&cred_s);
+		register_route(&button_s);
+		register_route(&servo_s);
 
 		return svr;
 	} else{

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdio.h>
 #include "sdkconfig.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -16,6 +17,8 @@
 #include "esp_camera.h"
 #include "camera_pins.h"
 #include "esp_spiffs.h"
+#include "iot_servo.h"
+#include "driver/ledc.h"
 
 #define WIFI_AUTHMODE WIFI_AUTH_WPA2_PSK
 #define WIFI_CONNECTED_BIT BIT0
