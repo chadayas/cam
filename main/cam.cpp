@@ -173,7 +173,7 @@ esp_err_t check_creds_handler(httpd_req_t *req){
 		std::string cookie = "session=" + std::string(CONFIG_CAM_SESSION_TOKEN) + "; Path=/; HttpOnly";
 		httpd_resp_set_hdr(req, "Set-Cookie", cookie.c_str());
 		httpd_resp_set_status(req, "302 Found");
-		httpd_resp_set_hdr(req, "Location", "/stream");
+		httpd_resp_set_hdr(req, "Location", "/");
 		httpd_resp_send(req, NULL, 0);
 		return ESP_OK;
 	} else {
@@ -188,14 +188,6 @@ esp_err_t check_creds_handler(httpd_req_t *req){
 
 esp_err_t stream_handler(httpd_req_t *req){
 	const char* TAG = "[--STREAM HANDLER--]";
-
-	if (!is_authenticated(req)) {
-		ESP_LOGW(TAG, "Unauthenticated request, redirecting to /auth");
-		httpd_resp_set_status(req, "302 Found");
-		httpd_resp_set_hdr(req, "Location", "/auth");
-		httpd_resp_send(req, NULL, 0);
-		return ESP_OK;
-	}
 
 	camera_fb_t * fb = NULL;
 	esp_err_t res = ESP_OK;
@@ -259,6 +251,14 @@ esp_err_t button_handler(httpd_req_t *req){
 
 	std::string html((std::istreambuf_iterator<char>(file)),
 			(std::istreambuf_iterator<char>()));
+	if (!is_authenticated(req)) {
+		ESP_LOGW(tag, "Unauthenticated request, redirecting to /auth");
+		httpd_resp_set_status(req, "302 Found");
+		httpd_resp_set_hdr(req, "Location", "/auth");
+		httpd_resp_send(req, NULL, 0);
+		return ESP_OK;
+	}
+
 	httpd_resp_set_type(req,"text/html");
 	
 	esp_err_t ret = httpd_resp_send(req, html.c_str(), html.length());
@@ -271,7 +271,15 @@ esp_err_t button_handler(httpd_req_t *req){
 }
 
 esp_err_t servo_handler(httpd_req_t * req){
-	auto tag = "[--SERVO--]";	
+	auto tag = "[--SERVO--]";
+
+	if (!is_authenticated(req)) {
+		httpd_resp_set_status(req, "302 Found");
+		httpd_resp_set_hdr(req, "Location", "/auth");
+		httpd_resp_send(req, NULL, 0);
+		return ESP_OK;
+	}
+
 	char query[64] = {0};
 	char cmd[16] = {0};
 	float angle = 0.0f;
