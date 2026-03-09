@@ -320,25 +320,17 @@ httpd_handle_t Httpserver::init(){
 		servo_s.method = HTTP_GET;
 		servo_s.handler = servo_handler;
 		
-		httpd_uri_t stream_s{};
-		stream_s.uri = "/stream";
-		stream_s.method = HTTP_GET;
-		stream_s.handler = stream_handler;
-		
 		httpd_uri_t auth_s{};
 		auth_s.uri = "/auth";
 		auth_s.method = HTTP_GET;
 		auth_s.handler = auth_handler;
-		
+
 		httpd_uri_t cred_s{};
 		cred_s.uri = "/auth";
 		cred_s.method = HTTP_POST;
 		cred_s.handler = check_creds_handler;
 
-
-
 		register_route(&auth_s);
-		register_route(&stream_s);
 		register_route(&cred_s);
 		register_route(&button_s);
 		register_route(&servo_s);
@@ -363,6 +355,39 @@ esp_err_t Httpserver::register_route(const httpd_uri_t *uri_cfg){
 
 }
 Httpserver::Httpserver(){
+	init();
+}
+
+httpd_handle_t StreamServer::init(){
+	cfg.server_port = 81;
+	cfg.ctrl_port = 32769;
+
+	if (httpd_start(&svr, &cfg) == ESP_OK){
+		ESP_LOGI(TAG, "Stream server started on port 81");
+
+		httpd_uri_t stream_s{};
+		stream_s.uri = "/stream";
+		stream_s.method = HTTP_GET;
+		stream_s.handler = stream_handler;
+
+		register_route(&stream_s);
+		return svr;
+	} else {
+		ESP_LOGE(TAG, "Failed to start stream server");
+		return NULL;
+	}
+}
+
+esp_err_t StreamServer::register_route(const httpd_uri_t *uri_cfg){
+	auto tag = "[--STREAM REGISTER--]";
+	if (uri_cfg == NULL){
+		ESP_LOGE(tag, "URI config is null");
+		return ESP_FAIL;
+	}
+	return httpd_register_uri_handler(svr, uri_cfg);
+}
+
+StreamServer::StreamServer(){
 	init();
 }
 
@@ -469,5 +494,6 @@ extern "C" void app_main(void){
     	}	
 	
 	static Httpserver http;
+	static StreamServer stream;
 
 }

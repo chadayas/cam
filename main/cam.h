@@ -69,11 +69,23 @@ class Httpserver{
 		Httpserver();
 	public:
 		httpd_handle_t init();
-		esp_err_t register_route(const httpd_uri_t *uri_cfg);	
+		esp_err_t register_route(const httpd_uri_t *uri_cfg);
 	private:
 		httpd_config_t cfg = HTTPD_DEFAULT_CONFIG();
 		httpd_handle_t svr = NULL;
 		const char* TAG = "[--HTTP--]";
+};
+
+class StreamServer{
+	public:
+		StreamServer();
+	public:
+		httpd_handle_t init();
+		esp_err_t register_route(const httpd_uri_t *uri_cfg);
+	private:
+		httpd_config_t cfg = HTTPD_DEFAULT_CONFIG();
+		httpd_handle_t svr = NULL;
+		const char* TAG = "[--STREAM SERVER--]";
 };
 
 
