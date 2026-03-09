@@ -282,7 +282,7 @@ esp_err_t servo_handler(httpd_req_t * req){
 
 	char query[64] = {0};
 	char cmd[16] = {0};
-	float angle = 0.0f;
+	static float angle = 0.0f;
 
 	httpd_req_get_url_query_str(req, query, sizeof(query));
 	httpd_query_key_value(query, "cmd", cmd, sizeof(cmd));
@@ -292,13 +292,17 @@ esp_err_t servo_handler(httpd_req_t * req){
 		auto mini_tag = "[INC ANGLE]";
 		angle += 1.0f;
 		if (angle > 270.0f) angle = 270.0f;
-		iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 1, angle);
+		esp_err_t good_write = iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 1, angle);
+		
+		if (good_write != ESP_OK) ESP_LOGE(tag, "Unable to write to servo");	
 		ESP_LOGI(mini_tag, "%.1f", angle);
 	} else if (strcmp(cmd, "right") == 0){
 		auto mini_tag = "[DEC ANGLE]";	
 		angle -= 1.0f;
 		if (angle < 0.0f) angle = 0.0f;
-		iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 1, angle);
+		esp_err_t good_write = iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 1, angle);
+	
+		if (good_write != ESP_OK) ESP_LOGE(tag, "Unable to write to servo");	
 		ESP_LOGI(mini_tag, "%.1f", angle);
 	}
 
