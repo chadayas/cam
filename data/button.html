@@ -52,13 +52,30 @@
 <body>
     <img src="http://192.168.1.89:81/stream" />
     <div class="servo-buttons">
-        <button onclick="fetch('/servo?cmd=left')">Left</button>
-        <button onclick="fetch('/servo?cmd=right')">Right</button>
+        <button id="btn-left">Left</button>
+        <button id="btn-right">Right</button>
     </div>
     <script>
-        function sendCmd(cmd) {
+        let interval = null;
+
+        function startCmd(cmd) {
             fetch('/servo?cmd=' + cmd);
+            interval = setInterval(() => fetch('/servo?cmd=' + cmd), 100);
         }
+
+        function stopCmd() {
+            clearInterval(interval);
+            interval = null;
+        }
+
+        ['left', 'right'].forEach(cmd => {
+            const btn = document.getElementById('btn-' + cmd);
+            btn.addEventListener('mousedown', () => startCmd(cmd));
+            btn.addEventListener('mouseup', stopCmd);
+            btn.addEventListener('mouseleave', stopCmd);
+            btn.addEventListener('touchstart', (e) => { e.preventDefault(); startCmd(cmd); });
+            btn.addEventListener('touchend', stopCmd);
+        });
     </script>
 </body>
 </html>
