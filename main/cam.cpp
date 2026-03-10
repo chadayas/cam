@@ -290,7 +290,7 @@ esp_err_t servo_handler(httpd_req_t * req){
 	
 	if (strcmp(cmd, "left") == 0){
 		auto mini_tag = "[INC ANGLE]";
-		angle += 1.0f;
+		angle += 5.0f;
 		if (angle > 270.0f) angle = 270.0f;
 		esp_err_t good_write = iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 1, angle);
 		
@@ -298,7 +298,7 @@ esp_err_t servo_handler(httpd_req_t * req){
 		ESP_LOGI(mini_tag, "%.1f", angle);
 	} else if (strcmp(cmd, "right") == 0){
 		auto mini_tag = "[DEC ANGLE]";	
-		angle -= 1.0f;
+		angle -= 5.0f;
 		if (angle < 0.0f) angle = 0.0f;
 		esp_err_t good_write = iot_servo_write_angle(LEDC_LOW_SPEED_MODE, 1, angle);
 	
@@ -500,4 +500,10 @@ extern "C" void app_main(void){
 	static Httpserver http;
 	static StreamServer stream;
 
+	auto PTAG = "[--PROFILE--]";
+	ESP_LOGI(PTAG, "=== MEMORY PROFILE ===");
+	ESP_LOGI(PTAG, "Free heap:          %lu bytes", esp_get_free_heap_size());
+	ESP_LOGI(PTAG, "Min free heap ever: %lu bytes", esp_get_minimum_free_heap_size());
+	ESP_LOGI(PTAG, "Largest free block: %lu bytes", heap_caps_get_largest_free_block(MALLOC_CAP_DEFAULT));
+	ESP_LOGI(PTAG, "Free PSRAM:         %lu bytes", heap_caps_get_free_size(MALLOC_CAP_SPIRAM));
 }
