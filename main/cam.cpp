@@ -500,10 +500,4 @@ extern "C" void app_main(void){
 	static Httpserver http;
 	static StreamServer stream;
 
-	auto PTAG = "[--PROFILE--]";
-	ESP_LOGI(PTAG, "=== MEMORY PROFILE ===");
-	ESP_LOGI(PTAG, "Free heap:          %lu bytes", esp_get_free_heap_size());
-	ESP_LOGI(PTAG, "Min free heap ever: %lu bytes", esp_get_minimum_free_heap_size());
-	ESP_LOGI(PTAG, "Largest free block: %lu bytes", heap_caps_get_largest_free_block(MALLOC_CAP_DEFAULT));
-	ESP_LOGI(PTAG, "Free PSRAM:         %lu bytes", heap_caps_get_free_size(MALLOC_CAP_SPIRAM));
 }
