@@ -19,6 +19,8 @@
 #include "esp_spiffs.h"
 #include "iot_servo.h"
 #include "driver/ledc.h"
+#include "mdns.h"
+#include "netdb.h"
 
 #define WIFI_AUTHMODE WIFI_AUTH_WPA2_PSK
 #define WIFI_CONNECTED_BIT BIT0
@@ -43,6 +45,7 @@ namespace Stream{
 
 };
 
+// starting process, wifi is needed in order create an ip for local http
 class WifiService{
 	public:
 		WifiService();
@@ -63,7 +66,7 @@ class WifiService{
 		const char* TAG = "[--WIFI--]";
 };
 
-
+// class to handle our base server for login and auth
 class Httpserver{
 	public:
 		Httpserver();
@@ -76,6 +79,7 @@ class Httpserver{
 		const char* TAG = "[--HTTP--]";
 };
 
+// seperate server instance to handle incoming cam frames
 class StreamServer{
 	public:
 		StreamServer();
@@ -90,4 +94,12 @@ class StreamServer{
 
 
 esp_err_t init_camera();
+
+// functions for mdns, base server on port 80 
+// cam server on 81
+
+esp_err_t start_mdns();
+esp_err_t add_mdns_service();
+
+
 
