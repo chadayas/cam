@@ -50,10 +50,10 @@ class WifiService{
 		esp_err_t init();
 		esp_err_t connect();
 	public:
-		const int WIFI_RETRY_ATTEMPT = 10;
+		const int WIFI_RETRY_ATTEMPT = 100;
 		int wifi_retry_count = 0;
 
-		esp_netif_t *tutorial_netif = NULL;
+		esp_netif_t *netif = NULL;
 		esp_event_handler_instance_t ip_event_handler;
 		esp_event_handler_instance_t wifi_event_handler;
 

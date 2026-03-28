@@ -62,8 +62,8 @@ esp_err_t WifiService::init(){
         return ret;
     }
 
-    tutorial_netif = esp_netif_create_default_wifi_sta();
-    if (tutorial_netif == NULL) {
+    netif = esp_netif_create_default_wifi_sta();
+    if (netif == NULL) {
         ESP_LOGE(TAG, "Failed to create default WiFi STA interface");
         return ESP_FAIL;
     }
