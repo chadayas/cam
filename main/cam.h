@@ -19,7 +19,6 @@
 #include "esp_spiffs.h"
 #include "iot_servo.h"
 #include "driver/ledc.h"
-#include "mdns.h"
 #include "netdb.h"
 
 #define WIFI_AUTHMODE WIFI_AUTH_WPA2_PSK
@@ -98,8 +97,7 @@ esp_err_t init_camera();
 // functions for mdns, base server on port 80 
 // cam server on 81
 
-esp_err_t start_mdns();
-esp_err_t add_mdns_service();
+void start_mdns();
 
 
 

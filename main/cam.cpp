@@ -311,8 +311,9 @@ esp_err_t servo_handler(httpd_req_t * req){
 }
 
 httpd_handle_t Httpserver::init(){
-	if (httpd_start(&svr, &cfg) == ESP_OK){
-		ESP_LOGI(TAG, "HTTP server started");
+   cfg.server_port = 80;	
+   if (httpd_start(&svr, &cfg) == ESP_OK){
+		ESP_LOGI(TAG, "HTTP server started on port 80");
 
 		httpd_uri_t button_s{};
 		button_s.uri = "/";
@@ -497,7 +498,10 @@ extern "C" void app_main(void){
     	  return;
     	}	
 	
-	static Httpserver http;
+   // get a hostname  
+   start_mdns();
+   
+   static Httpserver http;
 	static StreamServer stream;
 
 }
