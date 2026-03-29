@@ -2,8 +2,6 @@
 #include "mdns.h"
 
 #define MTAG "[--MDNS--]"
-#define NAME_CAM "esp-cam-server"
-#define NAME_STREAM "esp-stream"
 
 void start_mdns(){
 
