@@ -2,6 +2,8 @@
 #include<fstream>
 #include<string>
 
+static volatile float g_fps = 0.0f;
+
 static void wifi_event_cb(void *arg, esp_event_base_t event_base,
                           int32_t event_id, void *event_data) {
 	const char* TAG = "[--WIFI CALLBACK--]";	
@@ -232,14 +234,22 @@ esp_err_t stream_handler(httpd_req_t *req){
 		int64_t frame_time = fr_end - last_frame;
 		last_frame = fr_end;
 		frame_time /= 1000;
+		if (frame_time > 0) g_fps = 1000.0f / (uint32_t)frame_time;
 		ESP_LOGI(TAG, "MJPG: %uKB %ums (%.1ffps)",
 				(uint32_t)(frame_len/1024),
-				(uint32_t)frame_time, 1000.0 / (uint32_t)frame_time);
+				(uint32_t)frame_time, g_fps);
 	}
 
 	last_frame = 0;
 	return res;
 
+}
+
+esp_err_t fps_handler(httpd_req_t *req){
+	char buf[16];
+	snprintf(buf, sizeof(buf), "%.1f", g_fps);
+	httpd_resp_set_type(req, "text/plain");
+	return httpd_resp_send(req, buf, strlen(buf));
 }
 
 esp_err_t button_handler(httpd_req_t *req){
@@ -336,10 +346,16 @@ httpd_handle_t Httpserver::init(){
 		cred_s.method = HTTP_POST;
 		cred_s.handler = check_creds_handler;
 
+		httpd_uri_t fps_s{};
+		fps_s.uri = "/fps";
+		fps_s.method = HTTP_GET;
+		fps_s.handler = fps_handler;
+
 		register_route(&auth_s);
 		register_route(&cred_s);
 		register_route(&button_s);
 		register_route(&servo_s);
+		register_route(&fps_s);
 
 		return svr;
 	} else{
