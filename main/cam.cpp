@@ -12,7 +12,8 @@ static void wifi_event_cb(void *arg, esp_event_base_t event_base,
         esp_wifi_connect();
     } else if (event_id == WIFI_EVENT_STA_DISCONNECTED) {
         if (svc->wifi_retry_count < svc->WIFI_RETRY_ATTEMPT) {
-            ESP_LOGW(TAG, "Disconnected, retrying (%d/%d)", svc->wifi_retry_count + 1, svc->WIFI_RETRY_ATTEMPT);
+            ESP_LOGW(TAG, "Disconnected, retrying (%d/%d)", 
+                  svc->wifi_retry_count + 1, svc->WIFI_RETRY_ATTEMPT);
             esp_wifi_connect();
             svc->wifi_retry_count++;
         } else {
@@ -427,8 +428,8 @@ esp_err_t init_camera(){
 	camera_config.pixel_format = PIXFORMAT_JPEG;
 	camera_config.frame_size = FRAMESIZE_XGA;
 
-	camera_config.jpeg_quality = 20;
-	camera_config.fb_count = 1;
+	camera_config.jpeg_quality = 25;
+	camera_config.fb_count = 2;
 	camera_config.fb_location = CAMERA_FB_IN_PSRAM;
 	camera_config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
 	
