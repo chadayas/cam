@@ -20,10 +20,24 @@
             font-family: monospace;
         }
 
+        .stream-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
         img {
             width: 100%;
             max-width: 800px;
             border: 1px solid #333;
+        }
+
+        .fps {
+            color: #aaa;
+            font-size: 11px;
+            letter-spacing: 1px;
+            white-space: nowrap;
+            padding-top: 4px;
         }
 
         .servo-buttons {
@@ -50,12 +64,23 @@
     </style>
 </head>
 <body>
-    <img src="http://esp-server.local:81/stream" />
+    <div class="stream-row">
+        <div class="fps" id="fps">0 fps</div>
+        <img id="stream" src="http://esp-server.local:81/stream" />
+    </div>
     <div class="servo-buttons">
         <button id="btn-left">Left</button>
         <button id="btn-right">Right</button>
     </div>
     <script>
+        const fpsEl = document.getElementById('fps');
+        setInterval(() => {
+            fetch('/fps')
+                .then(r => r.text())
+                .then(v => fpsEl.textContent = v + ' fps')
+                .catch(() => {});
+        }, 1000);
+
         let interval = null;
 
         function startCmd(cmd) {
